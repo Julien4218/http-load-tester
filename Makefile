@@ -31,5 +31,6 @@ include build/compile.mk
 include build/deps.mk
 include build/test.mk
 include build/tools.mk
+include build/util.mk
 
 .PHONY: all build build-ci clean
