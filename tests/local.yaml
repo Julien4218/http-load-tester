@@ -1,0 +1,18 @@
+MinParallel: 1
+
+HttpTest:
+  URL: http://localhost:8080
+
+  Headers:
+    key1: value1
+    key2: value2
+
+  Body: |
+    Any multiline something goes in here
+    Line 2
+    Line 3
+    finish
+
+  SuccessResponseCodes:
+    - 200
+    - 201
