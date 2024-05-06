@@ -12,6 +12,7 @@ func TestInit(t *testing.T) {
 	fileContent := `
 MinParallel: 1
 RequestPerMinute: 60
+
 `
 	filepath, err := createTempYAMLFile(fileContent)
 	if err != nil {

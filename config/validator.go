@@ -18,7 +18,6 @@ func (c *InputConfig) Validate() []error {
 	if c.Loop < 0 {
 		all = append(all, fmt.Errorf("attribute Loop must either be 0 or a number of minutes:%d", c.Loop))
 	}
-
 	if c.HttpTest == nil {
 		all = append(all, fmt.Errorf("HttpTest is missing in the input configuration"))
 	} else {
@@ -26,6 +25,5 @@ func (c *InputConfig) Validate() []error {
 			all = append(all, fmt.Errorf("HttpTest is missing a URL"))
 		}
 	}
-
 	return all
 }

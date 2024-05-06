@@ -11,6 +11,7 @@ func TestShouldValidate(t *testing.T) {
 	config := &InputConfig{
 		MinParallel:      4,
 		RequestPerMinute: 120,
+		Loop:             0,
 		HttpTest: &HttpTest{
 			URL: "http://localhost",
 		},
