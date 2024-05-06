@@ -1,14 +1,10 @@
-package common
-
-type CommandContext struct {
-	RPM         int
-	Loop        int
-	InputConfig *InputConfig
-}
+package config
 
 type InputConfig struct {
-	MinParallel int       `yaml:"MinParallel"`
-	HttpTest    *HttpTest `yaml:"HttpTest"`
+	MinParallel      int       `yaml:"MinParallel"`
+	RequestPerMinute int       `yaml:"RequestPerMinute"`
+	Loop             int       `yaml:"Loop"`
+	HttpTest         *HttpTest `yaml:"HttpTest"`
 }
 
 type HttpTest struct {
