@@ -11,6 +11,7 @@ func TestShouldValidate(t *testing.T) {
 	config := &InputConfig{
 		MinParallel:      4,
 		RequestPerMinute: 120,
+		Intervals:        10,
 		Loop:             0,
 		HttpTest: &HttpTest{
 			URL: "http://localhost",
@@ -24,6 +25,7 @@ func TestShouldValidateMinParallel(t *testing.T) {
 	config := &InputConfig{
 		MinParallel:      0,
 		RequestPerMinute: 120,
+		Intervals:        10,
 		HttpTest: &HttpTest{
 			URL: "http://localhost",
 		},
@@ -42,6 +44,7 @@ func TestShouldValidateRequestPerMinute(t *testing.T) {
 	config := &InputConfig{
 		MinParallel:      4,
 		RequestPerMinute: 0,
+		Intervals:        10,
 		HttpTest: &HttpTest{
 			URL: "http://localhost",
 		},
@@ -56,10 +59,49 @@ func TestShouldValidateRequestPerMinute(t *testing.T) {
 	require.Fail(t, "no validation error for RequestPerMinute")
 }
 
+func TestShouldValidateIntervalsMin(t *testing.T) {
+	config := &InputConfig{
+		MinParallel:      4,
+		RequestPerMinute: 0,
+		Intervals:        0,
+		HttpTest: &HttpTest{
+			URL: "http://localhost",
+		},
+	}
+	errors := config.Validate()
+	require.NotEqual(t, len(errors), 0)
+	for _, err := range errors {
+		if strings.Contains(err.Error(), "Intervals") {
+			return
+		}
+	}
+	require.Fail(t, "no validation error for Intervals min")
+}
+
+func TestShouldValidateIntervalsMax(t *testing.T) {
+	config := &InputConfig{
+		MinParallel:      4,
+		RequestPerMinute: 0,
+		Intervals:        1001,
+		HttpTest: &HttpTest{
+			URL: "http://localhost",
+		},
+	}
+	errors := config.Validate()
+	require.NotEqual(t, len(errors), 0)
+	for _, err := range errors {
+		if strings.Contains(err.Error(), "Intervals") {
+			return
+		}
+	}
+	require.Fail(t, "no validation error for Intervals max")
+}
+
 func TestShouldValidateLoop(t *testing.T) {
 	config := &InputConfig{
 		MinParallel:      4,
 		RequestPerMinute: 120,
+		Intervals:        10,
 		Loop:             -1,
 		HttpTest: &HttpTest{
 			URL: "http://localhost",
@@ -79,6 +121,7 @@ func TestShouldValidateHttpTestExist(t *testing.T) {
 	config := &InputConfig{
 		MinParallel:      4,
 		RequestPerMinute: 120,
+		Intervals:        10,
 	}
 	errors := config.Validate()
 	require.NotEqual(t, len(errors), 0)
@@ -94,6 +137,7 @@ func TestShouldValidateHttpTestUrlExist(t *testing.T) {
 	config := &InputConfig{
 		MinParallel:      4,
 		RequestPerMinute: 120,
+		Intervals:        10,
 		HttpTest:         &HttpTest{},
 	}
 	errors := config.Validate()

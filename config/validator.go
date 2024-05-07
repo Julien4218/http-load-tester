@@ -15,6 +15,12 @@ func (c *InputConfig) Validate() []error {
 	if c.RequestPerMinute <= 0 {
 		all = append(all, fmt.Errorf("attribute RequestPerMinute must be greater than 0, received:%d", c.RequestPerMinute))
 	}
+	if c.Intervals <= 0 {
+		all = append(all, fmt.Errorf("attribute Intervals must be greater than 0, received:%d", c.Intervals))
+	}
+	if c.Intervals > 1000 {
+		all = append(all, fmt.Errorf("attribute Intervals must be less than 1000, received:%d", c.Intervals))
+	}
 	if c.Loop < 0 {
 		all = append(all, fmt.Errorf("attribute Loop must either be 0 or a number of minutes:%d", c.Loop))
 	}
