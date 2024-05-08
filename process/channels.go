@@ -1,18 +1,9 @@
 package process
 
-import (
-	"sync"
-)
-
 type Channels struct {
 	jobs    chan int
 	success chan bool
 	fail    chan bool
-	wg      *sync.WaitGroup
-}
-
-func (c *Channels) Done() {
-	c.wg.Done()
 }
 
 func (c *Channels) Poll() *int {

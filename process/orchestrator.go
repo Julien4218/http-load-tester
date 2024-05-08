@@ -2,7 +2,6 @@ package process
 
 import (
 	"fmt"
-	"sync"
 	"time"
 
 	"github.com/Julien4218/http-load-tester/config"
@@ -16,7 +15,11 @@ func Execute(config *config.InputConfig) {
 		jobs:    make(chan int, config.RequestPerMinute),
 		success: make(chan bool, config.RequestPerMinute),
 		fail:    make(chan bool, config.RequestPerMinute),
-		wg:      &sync.WaitGroup{},
+	}
+
+	pool := NewJobPool()
+	for processor := 0; processor < config.MinParallel; processor++ {
+		pool.CreateProcessor()
 	}
 
 	go ListenResult(channels.success, channels.fail)
@@ -25,15 +28,12 @@ func Execute(config *config.InputConfig) {
 		channels.jobs <- i
 	}
 
-	start := time.Now()
-	for processor := 0; processor < config.MinParallel; processor++ {
-		log.Infof("Adding processor:%d", processor)
-		channels.wg.Add(1)
-		go Listen(channels, processor, config.HttpTest)
-	}
 	log.Info("Waiting for completion")
-	channels.wg.Wait()
+	start := time.Now()
+	pool.Start(channels, config.HttpTest)
+	pool.WaitForCompletion()
 	duration := time.Since(start)
+
 	each := duration.Milliseconds() / int64(config.RequestPerMinute)
 	log.Infof("Total duration:%dMs each:%dMs", duration.Milliseconds(), each)
 }
