@@ -4,6 +4,7 @@ import (
 	"flag"
 
 	"github.com/Julien4218/http-load-tester/config"
+	"github.com/Julien4218/http-load-tester/observability"
 	"github.com/Julien4218/http-load-tester/process"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -28,6 +29,8 @@ func init() {
 }
 
 func globalInit(cmd *cobra.Command, args []string) {
+	go observability.Init()
+
 	var err error
 	InputConfig, err = config.Init(InputConfigFilepath)
 	if err != nil {
@@ -51,6 +54,5 @@ var Command = &cobra.Command{
 	Long:             `Execute a test on an http endpoint at a specified target RPM frequency (request per minute). Environment variable replacement is allowed with the syntax [env:MY_VAR_NAME] anywhere in the input config file`,
 	Run: func(cmd *cobra.Command, args []string) {
 		process.Execute(InputConfig)
-
 	},
 }

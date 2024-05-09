@@ -36,4 +36,6 @@ func Execute(config *config.InputConfig) {
 
 	each := duration.Milliseconds() / int64(config.RequestPerMinute)
 	log.Infof("Total duration:%dMs each:%dMs", duration.Milliseconds(), each)
+
+	time.Sleep(time.Second * 60)
 }
