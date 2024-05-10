@@ -39,3 +39,7 @@ func (p *JobPool) Start(channels *Channels, httpTest *config.HttpTest) {
 func (p *JobPool) WaitForCompletion() {
 	p.waitGroup.Wait()
 }
+
+func (p *JobPool) Size() int {
+	return len(p.processors)
+}

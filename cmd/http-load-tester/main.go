@@ -29,7 +29,7 @@ func init() {
 }
 
 func globalInit(cmd *cobra.Command, args []string) {
-	go observability.Init()
+	observability.Init()
 
 	var err error
 	InputConfig, err = config.Init(InputConfigFilepath)

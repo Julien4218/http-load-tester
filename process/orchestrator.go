@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/Julien4218/http-load-tester/config"
+	"github.com/Julien4218/http-load-tester/observability"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -33,6 +34,8 @@ func Execute(config *config.InputConfig) {
 	pool.Start(channels, config.HttpTest)
 	pool.WaitForCompletion()
 	duration := time.Since(start)
+
+	observability.GetMetrics().ElapsedTimeMs.Set(float64(duration.Milliseconds() / int64(pool.Size())))
 
 	each := duration.Milliseconds() / int64(config.RequestPerMinute)
 	log.Infof("Total duration:%dMs each:%dMs", duration.Milliseconds(), each)
