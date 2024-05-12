@@ -25,7 +25,9 @@ func Execute(config *config.InputConfig) {
 
 	go ListenResult(channels.success, channels.fail)
 
+	numTest := 0
 	for i := 0; i < config.RequestPerMinute; i++ {
+		numTest++
 		channels.jobs <- i
 	}
 
@@ -35,10 +37,10 @@ func Execute(config *config.InputConfig) {
 	pool.WaitForCompletion()
 	duration := time.Since(start)
 
-	observability.GetMetrics().ElapsedTimeMs.Set(float64(duration.Milliseconds() / int64(pool.Size())))
+	observability.GetMetrics().ElapsedTimeMs.Set(float64(duration.Milliseconds() / int64(numTest)))
 
 	each := duration.Milliseconds() / int64(config.RequestPerMinute)
 	log.Infof("Total duration:%dMs each:%dMs", duration.Milliseconds(), each)
 
-	time.Sleep(time.Second * 60)
+	observability.HarvestNow()
 }

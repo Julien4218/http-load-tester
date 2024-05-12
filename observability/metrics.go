@@ -1,8 +1,10 @@
 package observability
 
 import (
-	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/promauto"
+	"context"
+	"fmt"
+
+	"github.com/newrelic/newrelic-telemetry-sdk-go/telemetry"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -15,11 +17,23 @@ const (
 	metric_subsystem = "results"
 )
 
+type NewRelicCounter interface {
+	Inc()
+}
+
+type NewRelicGauge interface {
+	Set(value float64)
+}
+
+type NewRelicMetric struct {
+	name string
+}
+
 type Metrics struct {
-	TestCount     prometheus.Counter
-	SuccessCount  prometheus.Counter
-	FailCount     prometheus.Counter
-	ElapsedTimeMs prometheus.Gauge
+	TestCount     NewRelicCounter
+	SuccessCount  NewRelicCounter
+	FailCount     NewRelicCounter
+	ElapsedTimeMs NewRelicGauge
 }
 
 var (
@@ -36,22 +50,32 @@ func init() {
 	log.Infof("Metrics created")
 }
 
-func createCounter(name string) prometheus.Counter {
-	counter := promauto.NewCounter(prometheus.CounterOpts{
-		Namespace: metric_namespace,
-		Subsystem: metric_subsystem,
-		Name:      name})
-	return counter
+func createCounter(name string) NewRelicCounter {
+	return &NewRelicMetric{fmt.Sprintf("%s_%s_%s", metric_namespace, metric_subsystem, name)}
 }
 
-func createGauge(name string) prometheus.Gauge {
-	gauge := promauto.NewGauge(prometheus.GaugeOpts{
-		Namespace: metric_namespace,
-		Subsystem: metric_subsystem,
-		Name:      name})
-	return gauge
+func createGauge(name string) NewRelicGauge {
+	return &NewRelicMetric{fmt.Sprintf("Custom/%s_%s_%s", metric_namespace, metric_subsystem, name)}
 }
 
 func GetMetrics() *Metrics {
 	return metrics
+}
+
+func (m *NewRelicMetric) Inc() {
+	harvester.RecordMetric(telemetry.Count{
+		Name:  m.name,
+		Value: 1,
+	})
+}
+
+func (m *NewRelicMetric) Set(value float64) {
+	harvester.RecordMetric(telemetry.Gauge{
+		Name:  m.name,
+		Value: value,
+	})
+}
+
+func HarvestNow() {
+	harvester.HarvestNow(context.Background())
 }
