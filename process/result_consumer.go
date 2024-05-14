@@ -7,8 +7,15 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func ListenResult(success chan bool, fail chan bool) {
+func ListenResult(success chan bool, fail chan bool, done chan bool) {
 	for {
+		if len(done) > 0 {
+			isDone := <-done
+			if isDone {
+				close(done)
+				return
+			}
+		}
 		if len(success) > 0 {
 			<-success
 			observability.GetMetrics().TestCount.Inc()

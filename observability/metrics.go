@@ -3,6 +3,7 @@ package observability
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/newrelic/newrelic-telemetry-sdk-go/telemetry"
 	log "github.com/sirupsen/logrus"
@@ -64,15 +65,17 @@ func GetMetrics() *Metrics {
 
 func (m *NewRelicMetric) Inc() {
 	harvester.RecordMetric(telemetry.Count{
-		Name:  m.name,
-		Value: 1,
+		Name:      m.name,
+		Value:     1,
+		Timestamp: time.Now(),
 	})
 }
 
 func (m *NewRelicMetric) Set(value float64) {
 	harvester.RecordMetric(telemetry.Gauge{
-		Name:  m.name,
-		Value: value,
+		Name:      m.name,
+		Value:     value,
+		Timestamp: time.Now(),
 	})
 }
 

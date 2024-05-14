@@ -27,8 +27,10 @@ func (p *JobProcessor) ListenJob(channels *Channels, test *config.HttpTest) {
 	for {
 		job := channels.Poll()
 		if job != nil {
+			start := time.Now()
 			result := p.executeJob(*job, test)
-			channels.Complete(result)
+			duration := time.Since(start)
+			channels.Complete(result, duration)
 			continue
 		} else {
 			return
