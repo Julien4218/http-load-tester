@@ -6,7 +6,7 @@ HttpTest:
   URL: http://localhost:8080
 
   Headers:
-    key1: value1
+    key1: env::MY_KEY
     key2: value2
 
   Body: |

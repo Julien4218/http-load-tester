@@ -15,9 +15,7 @@ func Execute(config *config.InputConfig, dryRun bool) {
 	if dryRun {
 		function = NewDryRunJobFunction(time.Millisecond * 100)
 	} else {
-		log.Error("Http job function not implemented yet, use --dryrun")
-		log.Exit(1)
-		return
+		function = NewHttpJobFunction()
 	}
 
 	pool := NewJobPool(function)
