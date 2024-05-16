@@ -10,7 +10,6 @@ type HttpTest struct {
 type InputConfig struct {
 	MinParallel      int       `yaml:"MinParallel"`
 	RequestPerMinute int       `yaml:"RequestPerMinute"`
-	Intervals        int       `yaml:"Intervals"`
 	Loop             int       `yaml:"Loop"`
 	HttpTest         *HttpTest `yaml:"HttpTest"`
 }
