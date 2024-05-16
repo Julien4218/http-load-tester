@@ -15,7 +15,20 @@ func Execute(config *config.InputConfig) {
 		pool.CreateProcessor()
 	}
 
-	b := NewBatch(3, config.HttpTest)
-	b.Execute(pool)
+	initSpec := NewBatchSpec(config.MinParallel)
+	b := NewBatch(initSpec, config.HttpTest)
+	count := 0
+	for {
+		result := b.Execute(pool)
+		duration := result.Duration
+		spec := GetBatchSpec(config.RequestPerMinute, int(duration.Milliseconds()), config.MinParallel)
+		b = NewBatch(spec, config.HttpTest)
+		pool.AdjustSize(spec, config.MinParallel, config.RequestPerMinute)
+		if config.Loop > 0 && count == config.Loop {
+			break
+		}
+		count++
+		log.Infof("executing batch loop:%d", count)
+	}
 
 }

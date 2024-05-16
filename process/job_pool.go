@@ -26,6 +26,30 @@ func (p *JobPool) CreateProcessor() {
 	log.Infof("Adding processor:%d", id)
 }
 
+func (p *JobPool) RemoveProcessor() {
+	last := len(p.processors) - 1
+	processor := p.processors[last]
+	p.processors = p.processors[:last]
+	log.Infof("Removing processor:%d", processor.id)
+}
+
+func (p *JobPool) AdjustSize(spec *BatchSpec, minParallel int, maxParallel int) {
+	for {
+		if spec.TargetParallel < p.Size() && p.Size() > minParallel {
+			p.RemoveProcessor()
+		} else {
+			break
+		}
+	}
+	for {
+		if spec.TargetParallel > p.Size() && p.Size() < maxParallel {
+			p.CreateProcessor()
+		} else {
+			break
+		}
+	}
+}
+
 func (p *JobPool) Start(channels *Channels, httpTest *config.HttpTest) {
 	// Finish any work before starting new ones
 	p.WaitForCompletion()

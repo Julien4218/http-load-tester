@@ -3,15 +3,24 @@ package process
 import (
 	"math"
 	"time"
+
+	log "github.com/sirupsen/logrus"
 )
 
-type CalculatorResult struct {
+type BatchSpec struct {
 	TargetParallel int
-	WaitTime       time.Duration
+	MaxWaitTime    time.Duration
 }
 
-func getTiming(rpm int, duration_ms int, parallel int) *CalculatorResult {
-	result := &CalculatorResult{}
+func NewBatchSpec(rpm int) *BatchSpec {
+	return &BatchSpec{
+		TargetParallel: rpm,
+		MaxWaitTime:    time.Duration(0),
+	}
+}
+
+func GetBatchSpec(rpm int, duration_ms int, parallel int) *BatchSpec {
+	result := NewBatchSpec(rpm)
 
 	rpms := float64(rpm) / 60000
 	mspr := 1 / rpms
@@ -26,7 +35,9 @@ func getTiming(rpm int, duration_ms int, parallel int) *CalculatorResult {
 		result.TargetParallel = math_min_parallel
 	}
 	actual_ms := float64(result.TargetParallel) / rpms
-	result.WaitTime = time.Duration(actual_ms) * time.Millisecond
+	result.MaxWaitTime = time.Duration(actual_ms) * time.Millisecond
+
+	log.Infof("calculated next batch target:%d maxWaitTime:%dms", result.TargetParallel, result.MaxWaitTime.Milliseconds())
 
 	return result
 }

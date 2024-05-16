@@ -1,6 +1,7 @@
 MinParallel: 4
 RequestPerMinute: 60
 Intervals: 10
+Loop: 6
 
 HttpTest:
   URL: http://localhost:8080

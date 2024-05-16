@@ -9,7 +9,7 @@ import (
 )
 
 type Batch struct {
-	size     int
+	spec     *BatchSpec
 	httpTest *config.HttpTest
 }
 
@@ -17,24 +17,25 @@ type BatchResult struct {
 	Duration time.Duration
 }
 
-func NewBatch(size int, httpTest *config.HttpTest) *Batch {
+func NewBatch(spec *BatchSpec, httpTest *config.HttpTest) *Batch {
 	return &Batch{
-		size:     size,
+		spec:     spec,
 		httpTest: httpTest,
 	}
 }
 
 func (b *Batch) Execute(pool *JobPool) *BatchResult {
-	result := &BatchResult{}
+	start := time.Now()
+	log.Infof("Executing batch size:%d pool:%d", b.spec.TargetParallel, pool.Size())
 
 	channels := &Channels{
-		jobs:         make(chan int, b.size),
-		success:      make(chan bool, b.size),
-		fail:         make(chan bool, b.size),
-		job_duration: make(chan time.Duration, b.size),
+		jobs:         make(chan int, b.spec.TargetParallel),
+		success:      make(chan bool, b.spec.TargetParallel),
+		fail:         make(chan bool, b.spec.TargetParallel),
+		job_duration: make(chan time.Duration, b.spec.TargetParallel),
 	}
 
-	for i := 0; i < b.size; i++ {
+	for i := 0; i < b.spec.TargetParallel; i++ {
 		channels.jobs <- i
 	}
 
@@ -45,6 +46,7 @@ func (b *Batch) Execute(pool *JobPool) *BatchResult {
 	pool.Start(channels, b.httpTest)
 	pool.WaitForCompletion()
 
+	result := &BatchResult{}
 	duration := getJobDuration(channels.job_duration)
 	if duration != nil {
 		result.Duration = *duration
@@ -55,6 +57,13 @@ func (b *Batch) Execute(pool *JobPool) *BatchResult {
 
 	observability.HarvestNow()
 	done <- true
+
+	batchDuration := time.Since(start)
+	delay := b.spec.MaxWaitTime - batchDuration
+	if delay > 0 {
+		log.Infof("pacing to match desired rpm, waiting %dms", delay.Milliseconds())
+		time.Sleep(delay)
+	}
 
 	return result
 }
