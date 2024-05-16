@@ -4,21 +4,25 @@ import (
 	"sync"
 	"time"
 
-	"math/rand"
-
 	"github.com/Julien4218/http-load-tester/config"
 	log "github.com/sirupsen/logrus"
 )
 
-type JobProcessor struct {
-	id int
-	wg *sync.WaitGroup
+type JobFunction interface {
+	Execute(test *config.HttpTest) bool
 }
 
-func NewJobProcessor(id int, wg *sync.WaitGroup) *JobProcessor {
+type JobProcessor struct {
+	id       int
+	wg       *sync.WaitGroup
+	function JobFunction
+}
+
+func NewJobProcessor(id int, wg *sync.WaitGroup, function JobFunction) *JobProcessor {
 	return &JobProcessor{
 		id,
 		wg,
+		function,
 	}
 }
 
@@ -28,7 +32,8 @@ func (p *JobProcessor) ListenJob(channels *Channels, test *config.HttpTest) {
 		job := channels.Poll()
 		if job != nil {
 			start := time.Now()
-			result := p.executeJob(*job, test)
+			log.Infof("execute job processor:%d index:%d", p.id, *job)
+			result := p.function.Execute(test)
 			duration := time.Since(start)
 			channels.Complete(result, duration)
 			continue
@@ -36,11 +41,4 @@ func (p *JobProcessor) ListenJob(channels *Channels, test *config.HttpTest) {
 			return
 		}
 	}
-}
-
-func (p *JobProcessor) executeJob(index int, test *config.HttpTest) bool {
-	log.Infof("execute job processor:%d index:%d", p.id, index)
-	time.Sleep(time.Millisecond * 100)
-	val := rand.Intn(100)
-	return val < 50
 }

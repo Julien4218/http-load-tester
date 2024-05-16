@@ -7,13 +7,13 @@ import (
 )
 
 func TestAddPool(t *testing.T) {
-	pool := NewJobPool()
+	pool := NewJobPool(NewDryRunJobFunction(0))
 	pool.CreateProcessor()
 	require.Equal(t, 1, pool.Size())
 }
 
 func TestRemovePool(t *testing.T) {
-	pool := NewJobPool()
+	pool := NewJobPool(NewDryRunJobFunction(0))
 	pool.CreateProcessor()
 	pool.CreateProcessor()
 	pool.CreateProcessor()
@@ -22,7 +22,7 @@ func TestRemovePool(t *testing.T) {
 }
 
 func TestAdjustAdd(t *testing.T) {
-	pool := NewJobPool()
+	pool := NewJobPool(NewDryRunJobFunction(0))
 	pool.CreateProcessor()
 
 	spec := NewBatchSpec(2)
@@ -32,7 +32,7 @@ func TestAdjustAdd(t *testing.T) {
 }
 
 func TestAdjustRemove(t *testing.T) {
-	pool := NewJobPool()
+	pool := NewJobPool(NewDryRunJobFunction(0))
 	pool.CreateProcessor()
 	pool.CreateProcessor()
 	pool.CreateProcessor()
@@ -45,7 +45,7 @@ func TestAdjustRemove(t *testing.T) {
 }
 
 func TestAdjustShouldNotAddMore(t *testing.T) {
-	pool := NewJobPool()
+	pool := NewJobPool(NewDryRunJobFunction(0))
 	pool.CreateProcessor()
 	pool.CreateProcessor()
 	pool.CreateProcessor()
@@ -57,7 +57,7 @@ func TestAdjustShouldNotAddMore(t *testing.T) {
 }
 
 func TestAdjustShouldNotRemoveMore(t *testing.T) {
-	pool := NewJobPool()
+	pool := NewJobPool(NewDryRunJobFunction(0))
 	pool.CreateProcessor()
 	pool.CreateProcessor()
 	pool.CreateProcessor()

@@ -8,20 +8,22 @@ import (
 )
 
 type JobPool struct {
-	processors []*JobProcessor
-	waitGroup  *sync.WaitGroup
+	processors  []*JobProcessor
+	waitGroup   *sync.WaitGroup
+	jobFunction JobFunction
 }
 
-func NewJobPool() *JobPool {
+func NewJobPool(jobFunction JobFunction) *JobPool {
 	return &JobPool{
-		processors: []*JobProcessor{},
-		waitGroup:  &sync.WaitGroup{},
+		processors:  []*JobProcessor{},
+		waitGroup:   &sync.WaitGroup{},
+		jobFunction: jobFunction,
 	}
 }
 
 func (p *JobPool) CreateProcessor() {
 	id := len(p.processors) + 1
-	processor := NewJobProcessor(id, p.waitGroup)
+	processor := NewJobProcessor(id, p.waitGroup, p.jobFunction)
 	p.processors = append(p.processors, processor)
 	log.Infof("Adding processor:%d", id)
 }
