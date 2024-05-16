@@ -21,7 +21,14 @@ func Init() {
 
 	key := telemetry.ConfigAPIKey(licenseKey)
 	var err error
-	harvester, err = telemetry.NewHarvester(key)
+	var metricUrl func(*telemetry.Config)
+	metricApi := os.Getenv("NEW_RELIC_METRIC_API")
+	if len(metricApi) > 0 {
+		metricUrl = telemetry.ConfigMetricsURLOverride(metricApi)
+		harvester, err = telemetry.NewHarvester(key, metricUrl)
+	} else {
+		harvester, err = telemetry.NewHarvester(key)
+	}
 	if err != nil {
 		log.Error(err)
 		return
