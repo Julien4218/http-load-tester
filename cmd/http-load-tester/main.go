@@ -13,6 +13,7 @@ import (
 var (
 	InputConfig         *config.InputConfig
 	InputConfigFilepath string
+	DryRun              bool
 )
 
 func main() {
@@ -26,6 +27,7 @@ func main() {
 func init() {
 	Command.Flags().StringVar(&InputConfigFilepath, "config", "", "Input config file")
 	_ = Command.MarkFlagRequired("config")
+	Command.Flags().BoolVar(&DryRun, "dryrun", false, "dry run")
 }
 
 func globalInit(cmd *cobra.Command, args []string) {
@@ -53,6 +55,6 @@ var Command = &cobra.Command{
 	PersistentPreRun: globalInit,
 	Long:             `Execute a test on an http endpoint at a specified target RPM frequency (request per minute). Environment variable replacement is allowed with the syntax [env:MY_VAR_NAME] anywhere in the input config file`,
 	Run: func(cmd *cobra.Command, args []string) {
-		process.Execute(InputConfig)
+		process.Execute(InputConfig, DryRun)
 	},
 }

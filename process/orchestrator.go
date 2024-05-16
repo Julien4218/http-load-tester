@@ -8,10 +8,19 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func Execute(config *config.InputConfig) {
+func Execute(config *config.InputConfig, dryRun bool) {
 	log.Info(fmt.Sprintf("Start execution with rpm:%d, loop:%d, parallel:%d on URL:%s", config.RequestPerMinute, config.Loop, config.MinParallel, config.HttpTest.URL))
 
-	pool := NewJobPool(NewDryRunJobFunction(time.Millisecond * 100))
+	var function JobFunction
+	if dryRun {
+		function = NewDryRunJobFunction(time.Millisecond * 100)
+	} else {
+		log.Error("Http job function not implemented yet, use --dryrun")
+		log.Exit(1)
+		return
+	}
+
+	pool := NewJobPool(function)
 	for processor := 0; processor < config.MinParallel; processor++ {
 		pool.CreateProcessor()
 	}
