@@ -1,0 +1,28 @@
+MinParallel: 1
+RequestPerMinute: 60
+Loop: 1
+
+HttpTest:
+  URL: https://api.newrelic.com/graphql
+  Method: POST
+
+  Headers:
+    Content-Type: application/json
+    API-Key: env::NEW_RELIC_API_KEY
+
+  SingleLineBody: true
+  Body: >-
+    {"query":"{
+      actor {
+        user {
+          name
+        }
+      }
+    }", "variables":""}
+
+  SuccessResponseCodes:
+    - 200
+    - 201
+
+  SuccessJqQuery: >-
+    .data.actor.user.name | length > 0

@@ -13,5 +13,5 @@ func NewHttpJobFunction() *HttpJobFunction {
 }
 
 func (d *HttpJobFunction) Execute(test *config.HttpTest) bool {
-	return client.Execute(*test)
+	return client.Execute(test)
 }
