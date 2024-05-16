@@ -27,7 +27,11 @@ func Execute(test *config.HttpTest) bool {
 		body = strings.ReplaceAll(body, "\n", "")
 	}
 
-	req, err := http.NewRequest("POST", test.URL, strings.NewReader(body))
+	httpMethod := test.Method
+	if len(httpMethod) == 0 {
+		httpMethod = "GET"
+	}
+	req, err := http.NewRequest(httpMethod, test.URL, strings.NewReader(body))
 	if err != nil {
 		log.Errorf("error while creating request with url:%s, detail:%s", test.URL, err)
 		return false
