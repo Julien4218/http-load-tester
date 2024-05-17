@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"os"
 
 	"github.com/Julien4218/http-load-tester/config"
 	"github.com/Julien4218/http-load-tester/observability"
@@ -26,7 +27,6 @@ func main() {
 
 func init() {
 	Command.Flags().StringVar(&InputConfigFilepath, "config", "", "Input config file")
-	_ = Command.MarkFlagRequired("config")
 	Command.Flags().BoolVar(&DryRun, "dryrun", false, "dry run")
 }
 
@@ -34,7 +34,12 @@ func globalInit(cmd *cobra.Command, args []string) {
 	observability.Init()
 
 	var err error
-	InputConfig, err = config.Init(InputConfigFilepath)
+	envConfig := os.Getenv("HTTP_LOAD_TEST_INPUT_CONFIG")
+	if len(envConfig) > 0 {
+		InputConfig, err = config.InitWithContent([]byte(envConfig))
+	} else {
+		InputConfig, err = config.Init(InputConfigFilepath)
+	}
 	if err != nil {
 		log.Error(err)
 		log.Exit(1)
