@@ -3,6 +3,7 @@ package observability
 import (
 	"context"
 	"fmt"
+	"os"
 	"time"
 
 	"github.com/newrelic/newrelic-telemetry-sdk-go/telemetry"
@@ -38,10 +39,14 @@ type Metrics struct {
 }
 
 var (
-	metrics *Metrics
+	metrics  *Metrics
+	hostname string
+	pid      int
 )
 
 func init() {
+	hostname, _ = os.Hostname()
+	pid = os.Getpid()
 	metrics = &Metrics{
 		TestCount:     createCounter("test_count"),
 		SuccessCount:  createCounter("success_count"),
@@ -68,6 +73,10 @@ func (m *NewRelicMetric) Inc() {
 		Name:      m.name,
 		Value:     1,
 		Timestamp: time.Now(),
+		Attributes: map[string]interface{}{
+			"source": hostname,
+			"pid":    pid,
+		},
 	})
 }
 
@@ -76,6 +85,10 @@ func (m *NewRelicMetric) Set(value float64) {
 		Name:      m.name,
 		Value:     value,
 		Timestamp: time.Now(),
+		Attributes: map[string]interface{}{
+			"source": hostname,
+			"pid":    pid,
+		},
 	})
 }
 
