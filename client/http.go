@@ -28,10 +28,23 @@ func Execute(test *config.HttpTest) bool {
 	}
 
 	httpMethod := test.Method
+	httpMethod, err = replaceEnvVar(httpMethod)
+	if err != nil {
+		log.Errorf("error while setting httpMethod, detail:%s", err)
+		return false
+	}
 	if len(httpMethod) == 0 {
 		httpMethod = "GET"
 	}
-	req, err := http.NewRequest(httpMethod, test.URL, strings.NewReader(body))
+
+	url := test.URL
+	url, err = replaceEnvVar(url)
+	if err != nil {
+		log.Errorf("error while setting url, detail:%s", err)
+		return false
+	}
+
+	req, err := http.NewRequest(httpMethod, url, strings.NewReader(body))
 	if err != nil {
 		log.Errorf("error while creating request with url:%s, detail:%s", test.URL, err)
 		return false
