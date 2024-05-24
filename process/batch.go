@@ -25,7 +25,6 @@ func NewBatch(spec *BatchSpec, httpTest *config.HttpTest) *Batch {
 }
 
 func (b *Batch) Execute(pool *JobPool) *BatchResult {
-	start := time.Now()
 	log.Infof("Executing batch size:%d pool:%d", b.spec.TargetParallel, pool.Size())
 
 	channels := &Channels{
@@ -55,15 +54,7 @@ func (b *Batch) Execute(pool *JobPool) *BatchResult {
 
 	log.Infof("Each test duration average:%dMs", duration.Milliseconds())
 
-	observability.HarvestNow()
 	done <- true
-
-	batchDuration := time.Since(start)
-	delay := b.spec.MaxWaitTime - batchDuration
-	if delay > 0 {
-		log.Infof("pacing to match desired rpm, waiting %dms", delay.Milliseconds())
-		time.Sleep(delay)
-	}
 
 	return result
 }

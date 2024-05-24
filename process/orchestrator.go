@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/Julien4218/http-load-tester/config"
+	"github.com/Julien4218/http-load-tester/observability"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -25,18 +26,35 @@ func Execute(config *config.InputConfig, dryRun bool) {
 
 	initSpec := NewBatchSpec(config.MinParallel)
 	b := NewBatch(initSpec, config.HttpTest)
-	count := 0
+	count := 1
 	for {
+		lastStart := time.Now()
+		log.Infof("executing batch loop:%d", count)
 		result := b.Execute(pool)
 		duration := result.Duration
 		spec := GetBatchSpec(config.RequestPerMinute, int(duration.Milliseconds()), config.MinParallel)
 		b = NewBatch(spec, config.HttpTest)
 		pool.AdjustSize(spec, config.MinParallel, config.RequestPerMinute)
+
+		batchDuration := time.Since(lastStart)
+		delay := b.spec.MaxWaitTime - batchDuration
+		if delay > 0 {
+			log.Infof("pacing to match desired rpm, waiting %dms", delay.Milliseconds())
+			time.Sleep(delay)
+		} else {
+			log.Infof("no pacing required, batch duration of %dms is longer than maximum tolerated of %dms", batchDuration.Milliseconds(), b.spec.MaxWaitTime.Milliseconds())
+		}
+		finalDuration := time.Since(lastStart)
+		rpmPace := int64(spec.TargetParallel) * (60000 / finalDuration.Milliseconds())
+		log.Infof("completed:%d in %dms actualPace:%d", spec.TargetParallel, finalDuration.Milliseconds(), rpmPace)
+		observability.GetMetrics().RpmPace.Set(float64(rpmPace))
+		observability.HarvestNow()
+
+		// process next
 		if config.Loop > 0 && count == config.Loop {
 			break
 		}
 		count++
-		log.Infof("executing batch loop:%d", count)
 	}
 
 }

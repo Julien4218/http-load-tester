@@ -36,6 +36,7 @@ type Metrics struct {
 	SuccessCount  NewRelicCounter
 	FailCount     NewRelicCounter
 	ElapsedTimeMs NewRelicGauge
+	RpmPace       NewRelicGauge
 }
 
 var (
@@ -52,6 +53,7 @@ func init() {
 		SuccessCount:  createCounter("success_count"),
 		FailCount:     createCounter("fail_count"),
 		ElapsedTimeMs: createGauge("elapsed_time_ms"),
+		RpmPace:       createGauge("rpm_pace"),
 	}
 	log.Infof("Metrics created")
 }
