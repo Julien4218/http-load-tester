@@ -42,8 +42,8 @@ func Test6000RPM_5(t *testing.T) {
 	parallel := 5
 	result := GetBatchSpec(rpm, duration_ms, parallel)
 
-	require.Equal(t, int64(200), result.MaxWaitTime.Milliseconds())
-	require.Equal(t, 20, result.TargetParallel)
+	require.Equal(t, int64(110), result.MaxWaitTime.Milliseconds())
+	require.Equal(t, 12, result.TargetParallel)
 }
 
 func Test60000RPM_5(t *testing.T) {
@@ -52,6 +52,16 @@ func Test60000RPM_5(t *testing.T) {
 	parallel := 5
 	result := GetBatchSpec(rpm, duration_ms, parallel)
 
-	require.Equal(t, int64(200), result.MaxWaitTime.Milliseconds())
-	require.Equal(t, 200, result.TargetParallel)
+	require.Equal(t, int64(110), result.MaxWaitTime.Milliseconds())
+	require.Equal(t, 121, result.TargetParallel)
+}
+
+func Test60000RPM_back(t *testing.T) {
+	rpm := 60000
+	duration_ms := 300
+	parallel := 5
+	result := GetBatchSpec(rpm, duration_ms, parallel)
+
+	require.Equal(t, int64(330), result.MaxWaitTime.Milliseconds())
+	require.Equal(t, 363, result.TargetParallel)
 }

@@ -7,6 +7,10 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+const (
+	MULTIPLIER_BUFFER float64 = 1.1
+)
+
 type BatchSpec struct {
 	TargetParallel int
 	MaxWaitTime    time.Duration
@@ -24,18 +28,23 @@ func GetBatchSpec(rpm int, duration_ms int, parallel int) *BatchSpec {
 
 	rpms := float64(rpm) / 60000
 	mspr := 1 / rpms
-	min_duration_ms := float64(2 * duration_ms)
-	math_min_duration := float64(mspr)
-	if min_duration_ms > math_min_duration {
-		math_min_duration = min_duration_ms
+	buffer_duration_ms := float64(duration_ms) * MULTIPLIER_BUFFER
+	min_duration := float64(mspr)
+	if buffer_duration_ms > min_duration {
+		min_duration = buffer_duration_ms
 	}
-	math_min_parallel := int(math.Round(math_min_duration * float64(rpms)))
+	min_parallel := int(math.Round(min_duration * float64(rpms)))
 	result.TargetParallel = parallel
-	if math_min_parallel > parallel {
-		result.TargetParallel = math_min_parallel
+	if min_parallel > parallel {
+		result.TargetParallel = min_parallel
 	}
 	actual_ms := float64(result.TargetParallel) / rpms
 	result.MaxWaitTime = time.Duration(actual_ms) * time.Millisecond
+
+	previous_mspr := float64(duration_ms / parallel)
+	if previous_mspr >= mspr {
+		result.TargetParallel = int(float64(result.TargetParallel) * MULTIPLIER_BUFFER)
+	}
 
 	log.Infof("calculated next batch target:%d maxWaitTime:%dms", result.TargetParallel, result.MaxWaitTime.Milliseconds())
 

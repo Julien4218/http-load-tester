@@ -1,6 +1,6 @@
 MinParallel: 1
 RequestPerMinute: 6000
-Loop: 5
+Loop: 20
 
 HttpTest:
   URL: https://api.newrelic.com/graphql
