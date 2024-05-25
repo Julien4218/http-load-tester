@@ -23,12 +23,12 @@ func NewBatchSpec(rpm int) *BatchSpec {
 	}
 }
 
-func GetBatchSpec(rpm int, duration_ms int, parallel int) *BatchSpec {
+func GetBatchSpec(rpm int, duration time.Duration, parallel int) *BatchSpec {
 	result := NewBatchSpec(rpm)
 
 	rpms := float64(rpm) / 60000
 	mspr := 1 / rpms
-	buffer_duration_ms := float64(duration_ms) * MULTIPLIER_BUFFER
+	buffer_duration_ms := float64(duration.Milliseconds()) * MULTIPLIER_BUFFER
 	min_duration := float64(mspr)
 	if buffer_duration_ms > min_duration {
 		min_duration = buffer_duration_ms
@@ -41,7 +41,7 @@ func GetBatchSpec(rpm int, duration_ms int, parallel int) *BatchSpec {
 	actual_ms := float64(result.TargetParallel) / rpms
 	result.MaxWaitTime = time.Duration(actual_ms) * time.Millisecond
 
-	previous_mspr := float64(duration_ms / parallel)
+	previous_mspr := float64(duration.Milliseconds()) / float64(parallel)
 	if previous_mspr >= mspr {
 		result.TargetParallel = int(float64(result.TargetParallel) * MULTIPLIER_BUFFER)
 	}

@@ -32,7 +32,7 @@ func Execute(config *config.InputConfig, dryRun bool) {
 		log.Infof("executing batch loop:%d", count)
 		result := b.Execute(pool)
 		duration := result.Duration
-		spec := GetBatchSpec(config.RequestPerMinute, int(duration.Milliseconds()), config.MinParallel)
+		spec := GetBatchSpec(config.RequestPerMinute, duration, config.MinParallel)
 		b = NewBatch(spec, config.HttpTest)
 		pool.AdjustSize(spec, config.MinParallel, config.RequestPerMinute)
 
