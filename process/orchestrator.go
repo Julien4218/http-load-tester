@@ -24,17 +24,13 @@ func Execute(config *config.InputConfig, dryRun bool) {
 		pool.CreateProcessor()
 	}
 
-	initSpec := NewBatchSpec(config.MinParallel)
-	b := NewBatch(initSpec, config.HttpTest)
+	spec := NewBatchSpec(config.MinParallel)
+	b := NewBatch(spec, config.HttpTest)
 	count := 1
 	for {
 		lastStart := time.Now()
 		log.Infof("executing batch loop:%d", count)
 		result := b.Execute(pool)
-		duration := result.Duration
-		spec := GetBatchSpec(config.RequestPerMinute, duration, config.MinParallel)
-		b = NewBatch(spec, config.HttpTest)
-		pool.AdjustSize(spec, config.MinParallel, config.RequestPerMinute)
 
 		batchDuration := time.Since(lastStart)
 		delay := b.spec.MaxWaitTime - batchDuration
@@ -49,6 +45,11 @@ func Execute(config *config.InputConfig, dryRun bool) {
 		log.Infof("completed:%d in %dms actualPace:%d", spec.TargetParallel, finalDuration.Milliseconds(), rpmPace)
 		observability.GetMetrics().RpmPace.Set(float64(rpmPace))
 		observability.HarvestNow()
+
+		// prepare next
+		spec = GetBatchSpec(config.RequestPerMinute, result.Duration, spec.TargetParallel)
+		b = NewBatch(spec, config.HttpTest)
+		pool.AdjustSize(spec, config.MinParallel, config.RequestPerMinute)
 
 		// process next
 		if config.Loop > 0 && count == config.Loop {

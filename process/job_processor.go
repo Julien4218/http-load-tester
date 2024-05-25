@@ -32,7 +32,7 @@ func (p *JobProcessor) ListenJob(channels *Channels, test *config.HttpTest) {
 		job := channels.Poll()
 		if job != nil {
 			start := time.Now()
-			log.Infof("execute job processor:%d index:%d", p.id, *job)
+			log.Debugf("execute job processor:%d index:%d", p.id, *job)
 			result := p.function.Execute(test)
 			duration := time.Since(start)
 			channels.Complete(result, duration)

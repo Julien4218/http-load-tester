@@ -9,24 +9,26 @@ import (
 
 func ListenResult(success chan bool, fail chan bool, done chan bool) {
 	for {
+		if len(success) > 0 {
+			<-success
+			observability.GetMetrics().TestCount.Inc()
+			observability.GetMetrics().SuccessCount.Inc()
+			log.Debugf("SUCCESS")
+			continue
+		}
+		if len(fail) > 0 {
+			<-fail
+			observability.GetMetrics().TestCount.Inc()
+			observability.GetMetrics().FailCount.Inc()
+			log.Errorf("FAIL")
+			continue
+		}
 		if len(done) > 0 {
 			isDone := <-done
 			if isDone {
 				close(done)
 				return
 			}
-		}
-		if len(success) > 0 {
-			<-success
-			observability.GetMetrics().TestCount.Inc()
-			observability.GetMetrics().SuccessCount.Inc()
-			log.Infof("SUCCESS")
-		}
-		if len(fail) > 0 {
-			<-fail
-			observability.GetMetrics().TestCount.Inc()
-			observability.GetMetrics().FailCount.Inc()
-			log.Infof("FAIL")
 		}
 		time.Sleep(time.Millisecond * 10)
 	}
